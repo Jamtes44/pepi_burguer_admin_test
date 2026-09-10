@@ -1,5 +1,5 @@
 import { formatCurrency } from '../utils/formatters.js';
-import { updateProductStatus, updateProductPrices } from '../services/firebaseService.js';
+import { updateProductStatus, updateProductPrices, deleteProduct } from '../services/firebaseService.js';
 
 let currentEditingProduct = null;
 
@@ -116,9 +116,13 @@ export function renderCatalogList(products = [], orders = []) {
               <span class="material-symbols-outlined text-[15px]">payments</span>
               <span>Precios</span>
             </button>
-            <a href="edit-product.html?id=${product.id}" class="w-7 h-7 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary">
+            <a href="edit-product.html?id=${product.id}" class="w-7 h-7 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors" title="Editar producto">
               <span class="material-symbols-outlined text-[16px]">edit</span>
             </a>
+            <!-- Botón de Eliminación Completa -->
+            <button type="button" class="btn-delete-product w-7 h-7 rounded-full bg-error-container/40 hover:bg-error hover:text-white flex items-center justify-center text-error transition-all active:scale-95" data-id="${product.id}" data-name="${product.name}" title="Eliminar producto permanentemente">
+              <span class="material-symbols-outlined text-[16px]">delete</span>
+            </button>
           </div>
         </div>
       </div>
@@ -145,6 +149,26 @@ export function renderCatalogList(products = [], orders = []) {
         parseInt(target.dataset.solo, 10),
         target.dataset.combo ? parseInt(target.dataset.combo, 10) : null
       );
+    });
+  });
+
+  // Vincular eventos de Eliminación de Producto
+  document.querySelectorAll('.btn-delete-product').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const target = e.currentTarget;
+      const id = target.dataset.id;
+      const name = target.dataset.name;
+
+      const confirmed = window.confirm(`⚠️ ¿Deseas eliminar permanentemente "${name}"?\n\nEsta acción borrará el producto de la base de datos de Firebase y no se podrá deshacer.`);
+
+      if (confirmed) {
+        try {
+          await deleteProduct(id);
+          showFirebaseToast(`Producto "${name}" eliminado correctamente.`);
+        } catch (error) {
+          alert(`Error eliminando el producto: ${error.message}`);
+        }
+      }
     });
   });
 }
