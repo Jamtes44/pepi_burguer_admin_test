@@ -7,7 +7,8 @@ import {
   updateDoc, 
   setDoc,
   onSnapshot, 
-  getDoc 
+  getDoc, 
+  deleteDoc, 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -81,6 +82,14 @@ export async function saveProductDetails(productId, data) {
 export async function addNewProduct(productData) {
   const docRef = await addDoc(collection(db, "products"), productData);
   return docRef.id;
+}
+
+/**
+ * Elimina por completo un producto de la colección "products" por su ID
+ */
+export async function deleteProduct(productId) {
+  const productRef = doc(db, "products", productId);
+  await deleteDoc(productRef);
 }
 
 /**
